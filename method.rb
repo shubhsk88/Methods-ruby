@@ -23,10 +23,42 @@ module Enumerable
         end
         new_arr
     end
-               
+    
+    def my_all?
+        stat=true
+        my_each do |num|
+            if(!yield num)
+               stat=false
+            end
+        end
+        stat
+    end
+
+    def my_any?
+        stat=false
+        my_each do |num|
+            if(yield num)
+                stat=true
+                
+            end
+        end
+        stat
+    end
+
+    def my_none?
+        stat=true
+        my_each do |num|
+            if(yield num)
+                stat=false
+            end
+        end
+        stat
+    end
+
 end
 
 
-arr=[1,4,5,6,4]
+arr=[4,6,4]
 
-p arr.my_select{|num| num%2==0} 
+# p arr.my_all?{|num| num%2==0} 
+p %w[ant bear cat].any? { |word| word.length >= 4 }
