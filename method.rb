@@ -1,48 +1,123 @@
 module Enumerable
   def my_each
-    (0...length).each do |i|
-      yield self[i]
+    i = 0
+    arr= self.to_a
+    if block_given?
+      while i <arr.size
+        yield arr[i]
+        i += 1
+      end
+    else
+      return to_enum(:my_each)
     end
     self
   end
 
   def my_each_with_index
-    (0...length).each do |i|
-      yield self[i], i
+    i = 0
+    arr= self.to_a
+    if block_given?
+      while i <arr.size
+        yield arr[i],i
+        i += 1
+      end
+    else
+      return to_enum(:my_each)
     end
     self
   end
 
   def my_select
     new_arr = []
-    my_each do |num|
-      new_arr.push(num) if yield num
+    if block_given?
+      my_each do |num|
+        new_arr.push(num) if yield num
+      end
+    else 
+      return to_enum(:my_select)  
     end
+    
     new_arr
   end
 
-  def my_all?
+  def my_all?(arg=nil)
     stat = true
-    my_each do |num|
-      stat = false unless yield num
-    end
+
+    if(arg)
+      if(arg.class==Class)
+        my_each do |num|
+          stat= num.is_a?(arg)
+        end
+      else 
+        my_each do |num|
+          stat= num==arg
+        end
+      end
+
+    elsif block_given?
+      my_each do |num|
+        stat = false unless yield num
+      end
+    else
+      return stat  
+    end 
     stat
   end
 
-  def my_any?
+  def my_any?(arg=nil)
     stat = false
-    my_each do |num|
-      stat = true if yield num
-    end
+
+    if(arg)
+      if(arg.class==Class)
+        my_each do |num|
+          stat= num.is_a?(arg)
+        end
+      else 
+        my_each do |num|
+          stat= num==arg
+        end
+      end
+        
+    elsif block_given?
+      my_each do |num|
+        stat = true if yield num
+      end
+    else
+      return stat  
+    end 
     stat
+    
   end
 
-  def my_none?
+  def my_none?(arg=nil)
     stat = true
-    my_each do |num|
-      stat = false if yield num
-    end
+
+    if(arg)
+      if(arg.class==Class)
+        my_each do |num|
+          stat= num.is_a?(arg)
+        end
+      else 
+        my_each do |num|
+          stat= !num==arg
+        end
+      end
+        
+    elsif block_given?
+      my_each do |num|
+        stat = false if yield num
+      end
+    else
+      return stat  
+    end 
     stat
+    
+    
+    # stat = true
+    # my_each do |num|
+    #   stat = false if yield num
+    # end
+    # stat
   end
 
   def my_count(counter = size)
@@ -71,17 +146,21 @@ module Enumerable
 
   def my_map(prop = nil)
     new_arr = []
-    if prop
-      my_each do |num|
-        new_arr.push(prop.call(num))
-      end
+    if block_given?
 
+      if prop
+        my_each do |num|
+          new_arr.push(prop.call(num))
+        end
+
+      else
+        my_each do |num|
+          new_arr.push(yield num)
+        end
+      end
     else
-      my_each do |num|
-        new_arr.push(yield num)
-      end
-    end
-
+      return to_enum(:my_map) 
+    end  
     new_arr
   end
 end
@@ -93,7 +172,11 @@ arr = [4, 6, 3]
 
 # p (1..4).map { |i| i*i }
 # p arr.my_inject(0) { |sum, n| sum + n }
+# p arr.my_each_with_index
 
-p arr.multiply_els
-prop = proc { |x| x * 2 }
-p arr.my_map(prop)
+# p arr.my_all?
+# p arr.multiply_els
+# prop = proc { |x| x * 2 }
+# p arr.my_map(prop)
+
+
