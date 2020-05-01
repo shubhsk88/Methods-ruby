@@ -1,6 +1,6 @@
-# Array-Method Ruby
+# Enumerable methods Ruby
 
-This Project showcases and implements the Array method of ruby using the Enumerable,The method represented in this project as follow
+The project contains ruby enumerable methods. Where all the methods interact with an array and return the same value as the original method does. It covers the following enumerable methods.
 
 - each
 - each_with_index

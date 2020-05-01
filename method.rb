@@ -1,4 +1,4 @@
-module Enumerable
+module Enumerable # rubocop:disable Style/ModuleLength
   def my_each
     i = 0
     arr = to_a
@@ -35,7 +35,7 @@ module Enumerable
     new_arr
   end
 
-  def my_all?(arg = nil)
+  def my_all?(arg = nil) # rubocop:disable Style/MethodLength
     stat = true
 
     if arg
@@ -45,7 +45,7 @@ module Enumerable
         end
       else
         my_each do |num|
-          stat = num == arg
+          stat = num.to_s.match?(arg.to_s)
         end
       end
 
@@ -54,12 +54,15 @@ module Enumerable
         stat = false unless yield num
       end
     else
-      return stat
+      my_each do |num|
+        bool = !num
+        stat = !bool
+      end
     end
     stat
   end
 
-  def my_any?(arg = nil)
+  def my_any?(arg = nil) # rubocop:disable Style/MethodLength
     stat = false
 
     if arg
@@ -68,8 +71,9 @@ module Enumerable
           stat = num.is_a?(arg)
         end
       else
+
         my_each do |num|
-          stat = num == arg
+          stat = num.to_s.match?(arg.to_s)
         end
       end
 
@@ -86,17 +90,17 @@ module Enumerable
     stat
   end
 
-  def my_none?(arg = nil)
+  def my_none?(arg = nil) # rubocop:disable Style/MethodLength
     stat = true
 
     if arg
       if arg.class == Class
         my_each do |num|
-          stat = num.is_a?(arg)
+          stat = !num.is_a?(arg)
         end
       else
         my_each do |num|
-          stat = num != arg
+          stat = !num.to_s.match?(arg.to_s)
         end
       end
 
@@ -112,48 +116,51 @@ module Enumerable
     stat
   end
 
-  def my_count(counter = size)
+  def my_count(counter = nil)
     p_count = 0
+    return size if counter.nil? && !block_given?
+
     if block_given?
       my_each do |num|
         p_count += 1 if yield num
       end
-      counter = p_count
+
     end
-    counter
+    my_each do |num|
+      p_count += 1 if num == counter
+    end
+    p_count
   end
 
-  def my_inject(acc = 0)
-    my_each do |num|
-      acc = yield(acc, num)
+  def my_inject(acc = 0, sign = nil)
+    if acc.is_a?(Symbol)
+      sign = acc
+      acc = %i[+ -].include?(acc) ? 0 : 1
     end
+
+    my_each do |num|
+      acc = sign&.to_proc&.call(acc, num) if sign
+      acc = yield acc, num if block_given?
+    end
+
     acc
   end
 
-  def multiply_els
-    my_inject(1) do |acc, num|
-      acc * num
-    end
-  end
-
   def my_map(prop = nil)
-    new_arr = []
     return to_enum(:my_map) unless block_given?
 
-    if prop
-      my_each do |num|
-        new_arr.push(prop.call(num))
-      end
-
-    else
-      my_each do |num|
-        new_arr.push(yield num)
-      end
+    new_arr = []
+    my_each do |num|
+      new_arr.push(prop ? prop.call(num) : yield(num))
     end
-
     new_arr
   end
 end
+
+def multiply_els(array)
+  array.my_inject { |acc, num| acc * num }
+end
+
 # arr = [4, 6, 3]
 
 # p arr.my_all?{|num| num%2==0}
@@ -167,3 +174,8 @@ end
 # p arr.multiply_els
 # prop = proc { |x| x * 2 }
 # p arr.my_map(prop)
+# p [1, 2, 3].my_all? #should return true
+# p [1, 2, nil].my_all? #should return false
+# p [1, false, nil].my_all? #should return false
+p %w[dog door rod blade].my_all?(/d/) # should return true.
+p %w[dog door rod blade].my_all?(/t/) # should return false.
