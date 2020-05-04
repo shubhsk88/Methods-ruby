@@ -1,4 +1,4 @@
-module Enumerable # rubocop:disable Style/ModuleLength
+module Enumerable # rubocop:disable Metrics/ModuleLength
   def my_each
     i = 0
     arr = to_a
@@ -35,93 +35,92 @@ module Enumerable # rubocop:disable Style/ModuleLength
     new_arr
   end
 
-  def my_all?(arg = nil) # rubocop:disable Style/MethodLength
+  def my_all?(arg = nil) # rubocop:disable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     stat = true
 
     if arg
       if arg.class == Class
         my_each do |num|
           stat = num.is_a?(arg)
-          return stat if stat^0
+          return stat if stat ^ 0
         end
       else
         my_each do |num|
           stat = num.to_s.match?(arg.to_s)
-          return stat if stat==false
+          return stat if stat == false
         end
       end
 
     elsif block_given?
       my_each do |num|
         stat = false unless yield num
-        return stat if stat==false
+        return stat if stat == false
       end
     else
       my_each do |num|
-        stat=num^1
-        return stat if stat==false
+        stat = num ^ 1
+        return stat if stat == false
       end
     end
     stat
   end
 
-  def my_any?(arg = nil) # rubocop:disable Style/MethodLength
+  def my_any?(arg = nil) # rubocop:disable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     stat = false
 
     if arg
       if arg.class == Class
         my_each do |num|
           stat = num.is_a?(arg)
-          return stat if stat==true
-          
+          return stat if stat == true
         end
       else
 
         my_each do |num|
           stat = num.to_s.match?(arg.to_s)
-          return stat if stat==true
+          return stat if stat == true
         end
       end
 
     elsif block_given?
       my_each do |num|
         stat = true if yield num
-        return stat if stat==true
+        return stat if stat == true
       end
     else
       my_each do |num|
-        stat=num^1
-        return stat if stat==true
+        stat = num ^ 1
+        return stat if stat == true
       end
     end
     stat
   end
 
-  def my_none?(arg = nil) # rubocop:disable Style/MethodLength
+  def my_none?(arg = nil) # rubocop:disable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     stat = true
 
     if arg
       if arg.class == Class
         my_each do |num|
           stat = !num.is_a?(arg)
-          
+          return stat if stat == false
         end
       else
         my_each do |num|
           stat = !num.to_s.match?(arg.to_s)
-          
+          return stat if stat == false
         end
       end
 
     elsif block_given?
       my_each do |num|
         stat = false if yield num
-        
+        return stat if stat == false
       end
     else
       my_each do |num|
         stat = !num
-        
+        return stat if stat == false
       end
     end
     stat
@@ -143,13 +142,14 @@ module Enumerable # rubocop:disable Style/ModuleLength
     p_count
   end
 
-  def my_inject(acc = 0, sign = nil)
+  def my_inject(acc = 0, sign = nil) # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     if acc.is_a?(Symbol)
       sign = acc
       acc = %i[+ -].include?(acc) ? 0 : 1
     end
 
     my_each do |num|
+      acc = '' if num.class.eql?(String) && (acc.class.eql?(Integer) || acc.class.eql?(Float))
       acc = sign&.to_proc&.call(acc, num) if sign
       acc = yield acc, num if block_given?
     end
@@ -171,13 +171,3 @@ end
 def multiply_els(array)
   array.my_inject { |acc, num| acc * num }
 end
-
-
-p %w{ant bear cat}.my_none? { |word| word.length == 5 } #=> true
-p %w{ant bear cat}.my_none? { |word| word.length >= 4 } #=> false
-p %w{ant bear cat}.my_none?(/d/)                        #=> true
-p [1, 3.14, 42].my_none?(Float)                         #=> false
-p [].my_none?                                           #=> true
-p [nil].my_none?                                        #=> true
-p [nil, false].my_none?                                 #=> true
-p [nil, false, true].my_none?                           #=> false
