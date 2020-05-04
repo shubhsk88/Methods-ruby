@@ -42,21 +42,24 @@ module Enumerable # rubocop:disable Style/ModuleLength
       if arg.class == Class
         my_each do |num|
           stat = num.is_a?(arg)
+          return stat if stat^0
         end
       else
         my_each do |num|
           stat = num.to_s.match?(arg.to_s)
+          return stat if stat==false
         end
       end
 
     elsif block_given?
       my_each do |num|
         stat = false unless yield num
+        return stat if stat==false
       end
     else
       my_each do |num|
-        bool = !num
-        stat = !bool
+        stat=num^1
+        return stat if stat==false
       end
     end
     stat
@@ -69,22 +72,26 @@ module Enumerable # rubocop:disable Style/ModuleLength
       if arg.class == Class
         my_each do |num|
           stat = num.is_a?(arg)
+          return stat if stat==true
+          
         end
       else
 
         my_each do |num|
           stat = num.to_s.match?(arg.to_s)
+          return stat if stat==true
         end
       end
 
     elsif block_given?
       my_each do |num|
         stat = true if yield num
+        return stat if stat==true
       end
     else
       my_each do |num|
-        bool = !num
-        stat = !bool
+        stat=num^1
+        return stat if stat==true
       end
     end
     stat
@@ -97,20 +104,24 @@ module Enumerable # rubocop:disable Style/ModuleLength
       if arg.class == Class
         my_each do |num|
           stat = !num.is_a?(arg)
+          
         end
       else
         my_each do |num|
           stat = !num.to_s.match?(arg.to_s)
+          
         end
       end
 
     elsif block_given?
       my_each do |num|
         stat = false if yield num
+        
       end
     else
       my_each do |num|
         stat = !num
+        
       end
     end
     stat
@@ -161,21 +172,12 @@ def multiply_els(array)
   array.my_inject { |acc, num| acc * num }
 end
 
-# arr = [4, 6, 3]
 
-# p arr.my_all?{|num| num%2==0}
-# p arr.my_count(7)
-
-# p (1..4).map { |i| i*i }
-# p arr.my_inject(0) { |sum, n| sum + n }
-# p arr.my_each_with_index
-
-# p arr.my_all?
-# p arr.multiply_els
-# prop = proc { |x| x * 2 }
-# p arr.my_map(prop)
-# p [1, 2, 3].my_all? #should return true
-# p [1, 2, nil].my_all? #should return false
-# p [1, false, nil].my_all? #should return false
-p %w[dog door rod blade].my_all?(/d/) # should return true.
-p %w[dog door rod blade].my_all?(/t/) # should return false.
+p %w{ant bear cat}.my_none? { |word| word.length == 5 } #=> true
+p %w{ant bear cat}.my_none? { |word| word.length >= 4 } #=> false
+p %w{ant bear cat}.my_none?(/d/)                        #=> true
+p [1, 3.14, 42].my_none?(Float)                         #=> false
+p [].my_none?                                           #=> true
+p [nil].my_none?                                        #=> true
+p [nil, false].my_none?                                 #=> true
+p [nil, false, true].my_none?                           #=> false
