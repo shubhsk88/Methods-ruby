@@ -67,7 +67,6 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
 
   def my_any?(arg = nil) # rubocop:disable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     stat = false
-
     if arg
       if arg.class == Class
         my_each do |num|
@@ -89,7 +88,7 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
       end
     else
       my_each do |num|
-        stat = num ^ 1
+        stat = !num ^ 0
         return stat if stat == true
       end
     end
