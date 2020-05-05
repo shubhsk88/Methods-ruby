@@ -58,7 +58,7 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
       end
     else
       my_each do |num|
-        stat = num ^ 1
+        stat = !num ^ 0
         return stat if stat == false
       end
     end
